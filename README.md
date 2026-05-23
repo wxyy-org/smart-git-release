@@ -205,8 +205,8 @@ API Key 始终通过环境变量传入，不会写在配置文件里。项目级
 ## 快速开始
 
 ```bash
-# 全局安装
-pnpm install -g @wxyy-org/smart-git
+# 全局安装（指定 GitHub Packages registry）
+pnpm install -g @wxyy-org/smart-git@latest --@wxyy-org:registry=https://npm.pkg.github.com
 
 # 在仓库里初始化配置（可选，会生成 .smart-commit.jsonc 模板）
 git agm-init
