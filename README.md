@@ -11,6 +11,7 @@ Smart Git 是一套 Git 命令行增强工具，专为追求效率的开发者�
 - 不想全部提交？用 `git lna` 交互式勾选要暂存的文件
 - 写不出 commit message？用 `git agm` 让 AI 根据你的代码变更自动生成
 - 一次改了很多文件？用 `git agm -g` 让 AI 帮你按功能拆分成多个提交
+- 改动太大超出 AI 上下文限制？自动分批摘要，逐块压缩后再生成提交信息
 
 所有操作都走标准的 `git add` 和 `git commit`，完整兼容你的 Git Hooks（husky、lint-staged 等），绝不绕过校验。
 
@@ -29,9 +30,9 @@ Smart Git 是一套 Git 命令行增强工具，专为追求效率的开发者�
 
 ```
 ? 未暂存的文件（空格选中/取消，Enter 确认暂存；Ctrl+C 退出）
- ❯◯ [修改] src/ai/orchestration/race.mjs
-  ◯ [修改] src/cli/interactive/aigcm.mjs
-  ◉ [新增] src/ai/system-prompt-group.mjs
+ ❯◯ [修改] src/ai/orchestration/race.ts
+  ◯ [修改] src/cli/interactive/aigcm.ts
+  ◉ [新增] src/ai/system-prompt-group.ts
   ◯ [修改] package.json
 ```
 
@@ -75,7 +76,11 @@ Smart Git 是一套 Git 命令行增强工具，专为追求效率的开发者�
 
 确认后，工具会逐组：取消暂存 → 只 add 该组文件 → AI 生成 message → 提交。每组都是独立的 commit，历史清晰可追溯。
 
-### 4. 快捷语法 — "一行字搞定提交"
+### 4. 超大 diff 自动分批处理 — "再多改动也不怕"
+
+当暂存区的 diff 超过 AI 上下文限制时，工具会自动将变更拆分成多个 chunk，逐块调用 AI 生成摘要，最后汇总生成提交信息或分组方案。整个过程自动进行，无需人工干预。
+
+### 5. 快捷语法 — "一行字搞定提交"
 
 如果你只想快速提交，不用 AI，可以用 `@` 规则手写：
 
@@ -88,7 +93,7 @@ Smart Git 是一套 Git 命令行增强工具，专为追求效率的开发者�
 
 示例：`@d 修复登录 @t bug @z 1234` → `🐛 fix: 修复登录` + 正文 `Ref: ZENTAO-1234`
 
-### 5. 实时链路状态 — "看清每一次 AI 调用"
+### 6. 实时链路状态 — "看清每一次 AI 调用"
 
 确认提交信息前，终端会展示一张实时刷新的链路状态表：
 
@@ -116,9 +121,9 @@ Smart Git 是一套 Git 命令行增强工具，专为追求效率的开发者�
 # git lna — 选择性暂存
 
 ? 未暂存的文件（空格选中/取消，Enter 确认暂存）
- ❯◉ [修改] src/ai/orchestration/race.mjs
-  ◯ [新增] src/ai/system-prompt-group.mjs
-  ◉ [修改] src/cli/interactive/aigcm.mjs
+ ❯◉ [修改] src/ai/orchestration/race.ts
+  ◯ [新增] src/ai/system-prompt-group.ts
+  ◉ [修改] src/cli/interactive/aigcm.ts
 (Move up and down to reveal more choices)
 
 ✅ 已暂存 2 个文件
@@ -127,8 +132,8 @@ Smart Git 是一套 Git 命令行增强工具，专为追求效率的开发者�
 
 # git agm — AI 生成提交
 
- src/ai/orchestration/race.mjs      |  126 ++++++++
- src/cli/interactive/aigcm.mjs      |  274 ++++++++++++
+ src/ai/orchestration/race.ts      |  126 ++++++++
+ src/cli/interactive/aigcm.ts      |  274 ++++++++++++
  2 files changed, 400 insertions(+)
 
 ⏳ AI 正在生成提交信息… 已用时 3s
@@ -157,10 +162,13 @@ Smart Git 是一套 Git 命令行增强工具，专为追求效率的开发者�
 **场景二：大功能拆提交**
 > 一次改了 15 个文件，涉及登录、分页、文档。`git agm -g` 让 AI 拆成 3 个提交组，每组一个清晰的 commit，历史干净得像艺术品。
 
-**场景三：快速修复线上问题**
+**场景三：超大改动自动分批**
+> 一次重构涉及 50+ 文件，diff 超出 AI 上下文限制。工具自动分批摘要、汇总生成，全程无需手动拆分。
+
+**场景四：快速修复线上问题**
 > 紧急修 bug，没空想文案。`git add` 后直接 `git agm`，AI 自动识别是修复类改动，生成 `🐛 fix: ...`，你按个 y 就提交了。
 
-**场景四：手写快速提交**
+**场景五：手写快速提交**
 > 不想等 AI？`git agm` 确认时按 e 打开编辑器，或者直接用 `@d 修复登录 @t bug` 一行搞定。
 
 ---
